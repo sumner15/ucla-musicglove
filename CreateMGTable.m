@@ -14,19 +14,31 @@
 % lat - latency (mean timing of a grip compared to actual note timing)
 % std - standard deviation of latency (all grips)
 
+%% path handling
 addpath(cd);
-
 [~, name] = system('hostname');
 if strcmp(name(1:end-1),'DARTH-10')
     cd 'D:\Dropbox\UCI RESEARCH\UCLA\MusicGlove'
 end
-cd data\summary\
-subjects = {'AM_Right','AP_Right','BG_Left','BLG_Left','cw_Left',...
-            'EJ_Left','GC_Right','KY_Left','PM_Left','RM_Left','TC_Right'};        
-nSubs = length(subjects);   
+cd data\
 
-[bhr,phr,chr,bir,pir,cir,bmr,pmr,cmr,bLat,pLat,cLat,bStd,pStd,cStd] =...
-    deal(NaN(nSubs,1));
+%% initializing variables
+subjects = {'AM_Right','AP_Right','BG_Left','BLG_Left','cw_Left',...
+            'EJ_Left','GC_Right','KY_Left','PM_Left','RM_Left','TC_Right'};  
+conditions = {'Meds','Stim','Both','Follow Up'};
+
+nSubs = length(subjects);   
+nConds = length(conditions);
+
+[hitRateAll, latency, lateVar] = deal(NaN(nSubs,nConds));
+subGroup = NaN(nSubs,1);
+%     hitRateThu, hitRateInd, hitRateMid, hitRateRin, hitRatePin]
+% [bhr,phr,chr,bir,pir,cir,bmr,pmr,cmr,bLat,pLat,cLat,bStd,pStd,cStd] =...
+%     deal(NaN(nSubs,1));
+
+%% loading summary table
+load summary
+cd summary
 
 %% organizing data
 for sub = 1:nSubs     
@@ -42,69 +54,90 @@ for sub = 1:nSubs
     end    
     % filling data 
     try
-        songTitles = textdata(:,3);
-        sunshineInds = find(ismember(songTitles,'Sunshine Day'))-1;
-        speedInds = find(ismember(songTitles,'Speed Test'))-1;  
-        baseInds = [sunshineInds(1);speedInds(1)];
-        postInds = [sunshineInds(2);speedInds(2)];
+        % getting dates  & conditions from summary sheet
+        subInds = find(ismember(Dataexistsfor,subname(1:2)));
+        subDates = datetime(Date(subInds),'Format','yyyy-MM-dd');
+        subConds = Phase(subInds);
+        if strcmp(subConds{1}, 'Meds')
+            subGroup(sub) = 1;
+        elseif strcmp(subConds{1}, 'Stim')
+            subGroup(sub) = 2;
+        end
         
-        allHitsBase = sum(sum(data(baseInds,1:5)));
-        allHitsPossibleBase = sum(sum(data(baseInds,6:10)));      
-        allHitsPost = sum(sum(data(postInds,1:5)));
-        allHitsPossiblePost = sum(sum(data(postInds,6:10)));
+        % finding relevant data indices from dates
+        allDates = datetime(importdate(filename{1}),'Format','yyyy-MM-dd');
         
-        bhr(sub) = allHitsBase/allHitsPossibleBase*100;  
-        phr(sub) = allHitsPost/allHitsPossiblePost*100;       
+        % filling in Meds/Stim data     
+        if subGroup(sub)==1
+            condInd = find(ismember(subConds,'Meds'));
+        else
+            condInd = find(ismember(subConds,'Stim'));
+        end
+        if ~isempty(condInd)
+            condDate = subDates(condInd);
+            condDateInds = find(allDates == condDate);
+            allHits = sum(sum(data(condDateInds,1:5)));
+            allPoss = sum(sum(data(condDateInds,6:10)));
+            hitRateAll(sub,1) = allHits/allPoss*100;
+            if hitRateAll(sub,1)~=0
+                latency(sub,1) = -mean(data(condDateInds,11));                
+                lateVar(sub,1) = mean(data(condDateInds,12));
+            end
+        end
+        % filling in Stim/Meds data
+        if subGroup(sub)==1
+            condInd = find(ismember(subConds,'Stim'));
+        else
+            condInd = find(ismember(subConds,'Meds'));
+        end
+        if ~isempty(condInd)
+            condDate = subDates(condInd);
+            condDateInds = find(allDates == condDate);
+            allHits = sum(sum(data(condDateInds,1:5)));
+            allPoss = sum(sum(data(condDateInds,6:10)));
+            hitRateAll(sub,2) = allHits/allPoss*100;
+            if hitRateAll(sub,1)~=0
+                latency(sub,2) = -mean(data(condDateInds,11));                
+                lateVar(sub,2) = mean(data(condDateInds,12));
+            end
+        end
+        % filling in Stim+Meds data
+        condInd = find(ismember(subConds,'Both'));
+        if ~isempty(condInd)
+            condDate = subDates(condInd);
+            condDateInds = find(allDates == condDate);
+            allHits = sum(sum(data(condDateInds,1:5)));
+            allPoss = sum(sum(data(condDateInds,6:10)));
+            hitRateAll(sub,3) = allHits/allPoss*100;
+            if hitRateAll(sub,1)~=0
+                latency(sub,3) = -mean(data(condDateInds,11));                
+                lateVar(sub,3) = mean(data(condDateInds,12));
+            end
+        end
+        % filling in Follow Up data
+        condInd = find(ismember(subConds,'Follow Up'));
+        if ~isempty(condInd)
+            condDate = subDates(condInd);
+            condDateInds = find(allDates == condDate);
+            allHits = sum(sum(data(condDateInds,1:5)));
+            allPoss = sum(sum(data(condDateInds,6:10)));
+            hitRateAll(sub,4) = allHits/allPoss*100;
+            if hitRateAll(sub,1)~=0
+                latency(sub,4) = -mean(data(condDateInds,11));                
+                lateVar(sub,4) = mean(data(condDateInds,12));
+            end
+        end        
         
-        bir(sub) = sum(data(baseInds,2))/sum(data(baseInds,7))*100;
-        pir(sub) = sum(data(postInds,2))/sum(data(postInds,7))*100;
-        
-        bmr(sub) = sum(data(baseInds,3))/sum(data(baseInds,8))*100;
-        pmr(sub) = sum(data(postInds,3))/sum(data(postInds,8))*100;
-        
-        bLat(sub) = mean(data(baseInds,11));
-        pLat(sub) = mean(data(postInds,11));
-        
-        bStd(sub) = mean(data(baseInds,12));
-        pStd(sub) = mean(data(postInds,12));
-        
-        chr(sub) = phr(sub)-bhr(sub);        
-        cir(sub) = pir(sub)-bir(sub);
-        cmr(sub) = pmr(sub)-bmr(sub);
-        cLat(sub) = pLat(sub)-bLat(sub);
-        cStd(sub) = pStd(sub)-bStd(sub);
+   
         
     catch me 
-        warning([subname ': Data is badly sized']);
+        warning([subname ': Bad data, Subject skipped']);
     end
 end
 
-%% special cases
-for sub = 1:nSubs
-    %if they didn't hit a note at baseline, they have no baseline stats 
-    %(set to nan) and no change stats
-   if bhr(sub)==0      
-       bLat(sub) = NaN;
-       bStd(sub) = NaN;
-       cLat(sub) = NaN;
-       cStd(sub) = NaN;
-   end
-   %if they didn't hit a note at post, they have no post/change stats
-   if phr(sub)==0
-       pLat(sub) = NaN;
-       pStd(sub) = NaN;
-       cLat(sub) = NaN;
-       cStd(sub) = NaN;
-   end
-end
+%% saving data
+clear ans condInd filename I i me name sub subConds subDates subInds
+save('processedDataTable.mat');
 
-%% organize table and save
-MGData = table(bhr,phr,chr,bir,pir,cir,bmr,pmr,cmr,...
-    bLat,pLat,cLat,bStd,pStd,cStd,...
-    'RowNames',subjects);
-TCSV = table(subjects',...
-    bhr,phr,chr,bir,pir,cir,bmr,pmr,cmr,bLat,pLat,cLat,bStd,pStd,cStd);
-
-cd ..
-save('MusicGloveDataSummary','MGData')
-writetable(TCSV,'MusicGloveDataSummary.csv')
+%% calling plotting function
+plotMGUCLA();
