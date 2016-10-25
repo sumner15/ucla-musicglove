@@ -71,7 +71,8 @@ for sub = 1:nSubs
         if subGroup(sub)==1
             condInd = find(ismember(subConds,'Meds'));
         else
-            condInd = find(ismember(subConds,'Stim'));
+%             condInd = find(ismember(subConds,'Stim'));
+            condInd = find(ismember(subConds,'Meds'));
         end
         if ~isempty(condInd)
             condDate = subDates(condInd);
@@ -88,7 +89,8 @@ for sub = 1:nSubs
         if subGroup(sub)==1
             condInd = find(ismember(subConds,'Stim'));
         else
-            condInd = find(ismember(subConds,'Meds'));
+%             condInd = find(ismember(subConds,'Meds'));
+            condInd = find(ismember(subConds,'Stim'));
         end
         if ~isempty(condInd)
             condDate = subDates(condInd);
