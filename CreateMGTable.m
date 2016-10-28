@@ -18,30 +18,30 @@
 addpath(cd);
 [~, name] = system('hostname');
 if strcmp(name(1:end-1),'DARTH-10')
-    cd 'D:\Dropbox\UCI RESEARCH\UCLA\MusicGlove'
+    cd 'D:\Dropbox\UCI RESEARCH\UCLA\MusicGlove\data\'
+elseif strcmp(name(1:end-1),'LABPC-EEG')
+    cd 'C:\Users\Sumner\Dropbox\UCI RESEARCH\UCLA\MusicGlove\data\'
 end
-cd data\
 
 %% initializing variables
 subjects = {'AM_Right','AP_Right','BG_Left','BLG_Left','cw_Left',...
             'EJ_Left','GC_Right','KY_Left','PM_Left','RM_Left','TC_Right'};  
-conditions = {'Meds','Stim','Both','Follow Up'};
+        
+% conditions = {'Meds','Stim','Both','Follow Up'};
+conditions = {'Baseline','Meds','Stim','Both','Follow Up'};
 
 nSubs = length(subjects);   
 nConds = length(conditions);
 
 [hitRateAll, latency, lateVar] = deal(NaN(nSubs,nConds));
 subGroup = NaN(nSubs,1);
-%     hitRateThu, hitRateInd, hitRateMid, hitRateRin, hitRatePin]
-% [bhr,phr,chr,bir,pir,cir,bmr,pmr,cmr,bLat,pLat,cLat,bStd,pStd,cStd] =...
-%     deal(NaN(nSubs,1));
 
 %% loading summary table
 load summary
 cd summary
 
 %% organizing data
-for sub = 1:nSubs     
+for sub = 1:nSubs  
     % loading file
     try 
         subname = subjects{sub};       
@@ -51,7 +51,8 @@ for sub = 1:nSubs
     catch me 
         warning([subname ': No data found for this subject']);
         clear data textdata
-    end    
+    end        
+    
     % filling data 
     try
         % getting dates  & conditions from summary sheet
@@ -67,40 +68,46 @@ for sub = 1:nSubs
         % finding relevant data indices from dates
         allDates = datetime(importdate(filename{1}),'Format','yyyy-MM-dd');
         
-        % filling in Meds/Stim data     
-        if subGroup(sub)==1
-            condInd = find(ismember(subConds,'Meds'));
-        else
-%             condInd = find(ismember(subConds,'Stim'));
-            condInd = find(ismember(subConds,'Meds'));
-        end
+        % filling in Baseline data
+        condInd = find(ismember(subConds,'Meds'));        
         if ~isempty(condInd)
             condDate = subDates(condInd);
-            condDateInds = find(allDates == condDate);
-            allHits = sum(sum(data(condDateInds,1:5)));
-            allPoss = sum(sum(data(condDateInds,6:10)));
-            hitRateAll(sub,1) = allHits/allPoss*100;
-            if hitRateAll(sub,1)~=0
-                latency(sub,1) = -mean(data(condDateInds,11));                
-                lateVar(sub,1) = mean(data(condDateInds,12));
+            condDateInds = find(allDates == condDate); %meds inds
+            if condDateInds(1)>2
+                condDateInds = 1:condDateInds(1)-1; %baseline inds
+                allHits = sum(sum(data(condDateInds,1:5)));
+                allPoss = sum(sum(data(condDateInds,6:10)));
+                hitRateAll(sub,1) = allHits/allPoss*100;
+                if hitRateAll(sub,1)~=0
+                    latency(sub,1) = -mean(data(condDateInds,11));                
+                    lateVar(sub,1) = mean(data(condDateInds,12));
+                end
             end
-        end
-        % filling in Stim/Meds data
-        if subGroup(sub)==1
-            condInd = find(ismember(subConds,'Stim'));
-        else
-%             condInd = find(ismember(subConds,'Meds'));
-            condInd = find(ismember(subConds,'Stim'));
-        end
+        end        
+        % filling in Meds/Stim data     
+        condInd = find(ismember(subConds,'Meds'));        
         if ~isempty(condInd)
             condDate = subDates(condInd);
             condDateInds = find(allDates == condDate);
             allHits = sum(sum(data(condDateInds,1:5)));
             allPoss = sum(sum(data(condDateInds,6:10)));
             hitRateAll(sub,2) = allHits/allPoss*100;
-            if hitRateAll(sub,1)~=0
+            if hitRateAll(sub,2)~=0
                 latency(sub,2) = -mean(data(condDateInds,11));                
                 lateVar(sub,2) = mean(data(condDateInds,12));
+            end
+        end
+        % filling in Stim/Meds data        
+            condInd = find(ismember(subConds,'Stim'));
+        if ~isempty(condInd)
+            condDate = subDates(condInd);
+            condDateInds = find(allDates == condDate);
+            allHits = sum(sum(data(condDateInds,1:5)));
+            allPoss = sum(sum(data(condDateInds,6:10)));
+            hitRateAll(sub,3) = allHits/allPoss*100;
+            if hitRateAll(sub,3)~=0
+                latency(sub,3) = -mean(data(condDateInds,11));                
+                lateVar(sub,3) = mean(data(condDateInds,12));
             end
         end
         % filling in Stim+Meds data
@@ -110,10 +117,10 @@ for sub = 1:nSubs
             condDateInds = find(allDates == condDate);
             allHits = sum(sum(data(condDateInds,1:5)));
             allPoss = sum(sum(data(condDateInds,6:10)));
-            hitRateAll(sub,3) = allHits/allPoss*100;
-            if hitRateAll(sub,1)~=0
-                latency(sub,3) = -mean(data(condDateInds,11));                
-                lateVar(sub,3) = mean(data(condDateInds,12));
+            hitRateAll(sub,4) = allHits/allPoss*100;
+            if hitRateAll(sub,4)~=0
+                latency(sub,4) = -mean(data(condDateInds,11));                
+                lateVar(sub,4) = mean(data(condDateInds,12));
             end
         end
         % filling in Follow Up data
@@ -123,10 +130,10 @@ for sub = 1:nSubs
             condDateInds = find(allDates == condDate);
             allHits = sum(sum(data(condDateInds,1:5)));
             allPoss = sum(sum(data(condDateInds,6:10)));
-            hitRateAll(sub,4) = allHits/allPoss*100;
-            if hitRateAll(sub,1)~=0
-                latency(sub,4) = -mean(data(condDateInds,11));                
-                lateVar(sub,4) = mean(data(condDateInds,12));
+            hitRateAll(sub,5) = allHits/allPoss*100;
+            if hitRateAll(sub,5)~=0
+                latency(sub,5) = -mean(data(condDateInds,11));                
+                lateVar(sub,5) = mean(data(condDateInds,12));
             end
         end        
         

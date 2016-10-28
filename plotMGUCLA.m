@@ -2,6 +2,7 @@ function plotMGUCLA
 load processedDataTable.mat
 close all
 hitRateAll(nSubs,nConds) = NaN; %throwing out outlier
+xInds = [1 3 4 5 6];
 
 %% plotting hit rate for each group across phases 
 figure('Position', [100, 100, 800, 500]);
@@ -9,16 +10,16 @@ hold on
 h = cell(nSubs,1);
 for sub = 1:nSubs
     if subGroup(sub)==1
-        h{sub} = plot(1:4,hitRateAll(sub,:),...
+        h{sub} = plot(xInds,hitRateAll(sub,:),...
              'x-k','markers',16,'LineWidth',2); 
     else
-        h{sub} = plot(1:4,hitRateAll(sub,:),...
+        h{sub} = plot(xInds,hitRateAll(sub,:),...
              'o-b','markers',16,'LineWidth',2);
     end
     legend([h{1} h{4}], 'Meds first','Stim first');
-    axis([0.5 4.5 -5 100])
-    set(gca,'Xtick',1:4)
-    set(gca,'XtickLabel',{'Meds','Stim','Meds+Stim','Follow-Up'})
+    axis([0.5 6.5 -5 100])
+    set(gca,'Xtick',xInds)
+    set(gca,'XtickLabel',conditions)
     ylabel('Hit Rate (%)')   
     set(findall(gcf,'-property','FontSize'),'FontSize',20)
 end
@@ -29,17 +30,17 @@ hold on
 h = cell(nSubs,1);
 for sub = 1:nSubs
     if subGroup(sub)==1
-        h{sub} = plot(1:4,hitRateAll(sub,:)-hitRateAll(sub,1),...
+        h{sub} = plot(xInds,hitRateAll(sub,:)-hitRateAll(sub,2),...
             'x-k','markers',16,'LineWidth',2); 
     else
-        h{sub} = plot(1:4,hitRateAll(sub,:)-hitRateAll(sub,1),...
+        h{sub} = plot(xInds,hitRateAll(sub,:)-hitRateAll(sub,2),...
             'o-b','markers',16,'LineWidth',2);
     end
     legend([h{1} h{4}], 'Meds first','Stim first',...
         'Location','Northwest');
-    axis([0.5 4.5 -10 35])
-    set(gca,'Xtick',1:4)
-    set(gca,'XtickLabel',{'Meds','Stim','Meds+Stim','Follow-Up'})
+    axis([0.5 6.5 -20 35])
+    set(gca,'Xtick',xInds)
+    set(gca,'XtickLabel',conditions)
     ylabel('Change in Hit Rate (%)')   
     set(findall(gcf,'-property','FontSize'),'FontSize',20)
 end
@@ -60,17 +61,17 @@ hold on
 h = cell(nSubs,1);
 for sub = 1:nSubs
     if subGroup(sub)==1
-        h{sub} = plot(1:4,latency(sub,:)-latency(sub,1),...
+        h{sub} = plot(xInds,latency(sub,:)-latency(sub,2),...
             'x-k','markers',16,'LineWidth',2); 
     else
-        h{sub} = plot(1:4,latency(sub,:)-latency(sub,1),...
+        h{sub} = plot(xInds,latency(sub,:)-latency(sub,2),...
             'o-r','markers',16,'LineWidth',2);
     end
     legend([h{1} h{4}], 'Meds first','Stim first',...
         'Location','Best');
-    xlim([0.5 4])
-    set(gca,'Xtick',1:4)
-    set(gca,'XtickLabel',{'Meds','Stim','Meds+Stim','Follow-Up'})
+    xlim([0.5 6.5])
+    set(gca,'Xtick',xInds)
+    set(gca,'XtickLabel',conditions)
     ylabel('Change in Mean Latency (ms)')   
     set(findall(gcf,'-property','FontSize'),'FontSize',20)
 end
@@ -90,17 +91,17 @@ hold on
 h = cell(nSubs,1);
 for sub = 1:nSubs
     if subGroup(sub)==1
-        h{sub} = plot(1:4,lateVar(sub,:)-lateVar(sub,1),...
+        h{sub} = plot(xInds,lateVar(sub,:)-lateVar(sub,2),...
             'x-k','markers',16,'LineWidth',2); 
     else
-        h{sub} = plot(1:4,lateVar(sub,:)-lateVar(sub,1),...
+        h{sub} = plot(xInds,lateVar(sub,:)-lateVar(sub,2),...
             'o-m','markers',16,'LineWidth',2);
     end
     legend([h{1} h{4}], 'Meds first','Stim first',...
         'Location','Best');
-    xlim([0.5 4])
-    set(gca,'Xtick',1:4)
-    set(gca,'XtickLabel',{'Meds','Stim','Meds+Stim','Follow-Up'})
+    xlim([0.5 6.5])
+    set(gca,'Xtick',xInds)
+    set(gca,'XtickLabel',conditions)
     ylabel('Change in STD of Latency (ms)')   
     set(findall(gcf,'-property','FontSize'),'FontSize',20)
 end
