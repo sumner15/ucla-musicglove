@@ -27,7 +27,6 @@ end
 subjects = {'AM_Right','AP_Right','BG_Left','BLG_Left','cw_Left',...
             'EJ_Left','GC_Right','KY_Left','PM_Left','RM_Left','TC_Right'};  
         
-% conditions = {'Meds','Stim','Both','Follow Up'};
 conditions = {'Baseline','Meds','Stim','Both','Follow Up'};
 
 nSubs = length(subjects);   
@@ -35,6 +34,7 @@ nConds = length(conditions);
 
 [hitRateAll, latency, lateVar] = deal(NaN(nSubs,nConds));
 subGroup = NaN(nSubs,1);
+nBaseMeasurements = NaN(nSubs,nConds);
 
 %% loading summary table
 load summary
@@ -74,7 +74,7 @@ for sub = 1:nSubs
             condDate = subDates(condInd);
             condDateInds = find(allDates == condDate); %meds inds
             if condDateInds(1)>2
-                condDateInds = 1:condDateInds(1)-1; %baseline inds
+                condDateInds = 1:condDateInds(1)-1; %baseline inds               
                 allHits = sum(sum(data(condDateInds,1:5)));
                 allPoss = sum(sum(data(condDateInds,6:10)));
                 hitRateAll(sub,1) = allHits/allPoss*100;
@@ -82,6 +82,7 @@ for sub = 1:nSubs
                     latency(sub,1) = -mean(data(condDateInds,11));                
                     lateVar(sub,1) = mean(data(condDateInds,12));
                 end
+                nBaseMeasurements(sub,1) = length(condDateInds);
             end
         end        
         % filling in Meds/Stim data     
@@ -96,6 +97,7 @@ for sub = 1:nSubs
                 latency(sub,2) = -mean(data(condDateInds,11));                
                 lateVar(sub,2) = mean(data(condDateInds,12));
             end
+            nBaseMeasurements(sub,2) = length(condDateInds);
         end
         % filling in Stim/Meds data        
             condInd = find(ismember(subConds,'Stim'));
@@ -109,6 +111,7 @@ for sub = 1:nSubs
                 latency(sub,3) = -mean(data(condDateInds,11));                
                 lateVar(sub,3) = mean(data(condDateInds,12));
             end
+            nBaseMeasurements(sub,3) = length(condDateInds);
         end
         % filling in Stim+Meds data
         condInd = find(ismember(subConds,'Both'));
@@ -122,6 +125,7 @@ for sub = 1:nSubs
                 latency(sub,4) = -mean(data(condDateInds,11));                
                 lateVar(sub,4) = mean(data(condDateInds,12));
             end
+            nBaseMeasurements(sub,4) = length(condDateInds);
         end
         % filling in Follow Up data
         condInd = find(ismember(subConds,'Follow Up'));
@@ -135,6 +139,7 @@ for sub = 1:nSubs
                 latency(sub,5) = -mean(data(condDateInds,11));                
                 lateVar(sub,5) = mean(data(condDateInds,12));
             end
+            nBaseMeasurements(sub,5) = length(condDateInds);
         end        
         
    
