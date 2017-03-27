@@ -27,7 +27,8 @@ end
 subjects = {'AM_Right','AP_Right','BG_Left','BLG_Left','cw_Left',...
             'EJ_Left','GC_Right','KY_Left','PM_Left','RM_Left','TC_Right'};  
         
-conditions = {'Baseline','Meds','Stim','Both','Follow Up'};
+conditions = {'baseline','meds','stim','both','follow Up'};
+chronoConditions = {'baseline','','','both','follow up'};
 
 nSubs = length(subjects);   
 nConds = length(conditions);
@@ -148,6 +149,17 @@ for sub = 1:nSubs
         warning([subname ': Bad data, Subject skipped']);
     end
 end
+
+%% create a chronological hit rate matrix
+chronoHitRateAll = NaN(size(hitRateAll));
+reOrder = [1 3 2 4 5]; % reverses stim & meds
+for sub = 1:nSubs
+    if subGroup(sub) == 1
+        chronoHitRateAll(sub,:) = hitRateAll(sub,:);
+    elseif subGroup(sub) ==2        
+        chronoHitRateAll(sub,:) = hitRateAll(sub,reOrder);
+    end
+end       
 
 %% saving data
 clear ans condInd filename I i me name sub subConds subDates subInds
