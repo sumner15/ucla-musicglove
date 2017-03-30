@@ -13,6 +13,7 @@
 % r - hit rate (percentage of notes hit for a particular grip)
 % lat - latency (mean timing of a grip compared to actual note timing)
 % std - standard deviation of latency (all grips)
+clear
 
 %% path handling
 addpath(cd);
@@ -24,10 +25,10 @@ elseif strcmp(name(1:end-1),'LABPC-EEG')
 end
 
 %% initializing variables
-subjects = {'AM_Right','AP_Right','BG_Left','BLG_Left','cw_Left',...
+subjects = {'AM_Right','AP_Right','BG_Left','BLG_Left','cw_Left',...                
             'EJ_Left','GC_Right','KY_Left','PM_Left','RM_Left','TC_Right'};  
-        
-conditions = {'baseline','meds','stim','both','follow Up'};
+
+conditions = {'baseline','stim','meds','both','follow Up'};
 chronoConditions = {'baseline','','','both','follow up'};
 
 nSubs = length(subjects);   
@@ -87,7 +88,7 @@ for sub = 1:nSubs
             end
         end        
         % filling in Meds/Stim data     
-        condInd = find(ismember(subConds,'Meds'));        
+        condInd = find(ismember(subConds,'Stim'));        
         if ~isempty(condInd)
             condDate = subDates(condInd);
             condDateInds = find(allDates == condDate);
@@ -101,7 +102,7 @@ for sub = 1:nSubs
             nBaseMeasurements(sub,2) = length(condDateInds);
         end
         % filling in Stim/Meds data        
-            condInd = find(ismember(subConds,'Stim'));
+            condInd = find(ismember(subConds,'Meds'));
         if ~isempty(condInd)
             condDate = subDates(condInd);
             condDateInds = find(allDates == condDate);
@@ -165,5 +166,22 @@ end
 clear ans condInd filename I i me name sub subConds subDates subInds
 save('processedDataTable.mat');
 
-%% calling plotting function
-plotMGUCLA();
+%% calling plotting functions
+respond.index = [0 1 1 1 1 1 0 0 0 0 1]';      
+respond.index = respond.index.*subGroup+1;
+respond.title = {'NF','F,Stim 1^{st}','F,Med 1^{st}'};
+respond.color = {[128 128 128],[255 128 0],[0 0 255]};
+measureStr = 'Hit Rate (%)';
+
+figure('Position', [100, 100, 800, 1000]);
+subplot(2,5,1:4)
+plotMGGroups(hitRateAll,respond,measureStr);
+grid on
+
+hitRateChange = hitRateAll-hitRateAll(:,1);
+measureStr = 'Change in Hit Rate (%)';
+subplot(2,5,6:9)
+plotMGGroups(hitRateChange,respond,measureStr);
+grid on
+
+% plotMGUCLA(); % deprecated plotting
